@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Cooking Timer</string>
+
+    <!--TimerFragment-->
+    <string name="no_timers_message">You don\'t have any timers yet</string>
+
+    <!--Miscellaneous-->
+    <string name="add">ADD</string>
+    <string name="timers">Timers</string>
 </resources>
