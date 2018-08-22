@@ -2,6 +2,7 @@ package com.example.company.cookingtimer.fragments;
 
 
 import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -9,11 +10,13 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
@@ -53,6 +56,29 @@ public class TimerFragment extends Fragment {
             //Empty
         }
 
+        private void setupWheelPickers(View view) {
+            // Setup Hourly wheel picker
+            String[] wheelPickerHourlyValue = new String[]{"0","1","2","3"};
+            NumberPicker wheelPickerHourly = view.findViewById(R.id.wheel_picker_hourly);
+            wheelPickerHourly.setMinValue(0);
+            wheelPickerHourly.setMaxValue(wheelPickerHourlyValue.length-1);
+            wheelPickerHourly.setDisplayedValues(wheelPickerHourlyValue);
+
+            // Setup Minutes wheel picker
+            String[] wheelPickerMinValue = new String[]{"0","1","2","3"};
+            NumberPicker wheelPickerMin = view.findViewById(R.id.wheel_picker_min);
+            wheelPickerMin.setMinValue(0);
+            wheelPickerMin.setMaxValue(wheelPickerMinValue.length-1);
+            wheelPickerMin.setDisplayedValues(wheelPickerMinValue);
+
+            // Setup Sec wheel picker
+            String[] wheelPickerSecValue = new String[]{"0","1","2","3"};
+            NumberPicker wheelPickerSec = view.findViewById(R.id.wheel_picker_sec);
+            wheelPickerSec.setMinValue(0);
+            wheelPickerSec.setMaxValue(wheelPickerSecValue.length-1);
+            wheelPickerSec.setDisplayedValues(wheelPickerSecValue);
+        }
+
         @Nullable
         @Override
         public View onCreateView(@NonNull LayoutInflater inflater,
@@ -60,13 +86,7 @@ public class TimerFragment extends Fragment {
                                  @Nullable Bundle savedInstanceState) {
             View dialogView = inflater.inflate(R.layout.full_screen_dialog, container, false);
 
-            // Setup Hourly wheel picker
-            String[] wheelPickerHourlyValue = new String[]{"0","1","2","3"};
-            NumberPicker wheelPickerHourly = dialogView.findViewById(R.id.wheel_picker_hourly);
-            wheelPickerHourly.setMinValue(0);
-            wheelPickerHourly.setMaxValue(wheelPickerHourlyValue.length-1);
-            wheelPickerHourly.setDisplayedValues(wheelPickerHourlyValue);
-
+            setupWheelPickers(dialogView);
 
             Button closeDialog = dialogView.findViewById(R.id.close);
             closeDialog.setOnClickListener(new View.OnClickListener() {

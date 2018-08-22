@@ -14,12 +14,34 @@
         android:gravity="center_vertical|center_horizontal"
         android:textAlignment="center">
 
-        <NumberPicker
-            android:id="@+id/wheel_picker_hourly"
-            android:layout_width="wrap_content"
-            android:layout_height="180dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp"
+            android:orientation="horizontal">
 
-        </NumberPicker>
+            <NumberPicker
+                android:id="@+id/wheel_picker_hourly"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_height="180dp"
+                android:theme="@style/NumberPickerText"/>
+
+            <NumberPicker
+                android:id="@+id/wheel_picker_min"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_height="180dp"
+                android:theme="@style/NumberPickerText"/>
+
+            <NumberPicker
+                android:id="@+id/wheel_picker_sec"
+                android:layout_width="wrap_content"
+                android:layout_weight="1"
+                android:layout_height="180dp"
+                android:theme="@style/NumberPickerText"/>
+        </LinearLayout>
+
 
         <Button
             android:id="@+id/close"
