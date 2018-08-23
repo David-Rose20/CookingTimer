@@ -106,16 +106,8 @@ public class TimerFragment extends Fragment {
             wheelPickerSec.setDisplayedValues(wheelPickerSecValue);
         }
 
-        @Nullable
-        @Override
-        public View onCreateView(@NonNull LayoutInflater inflater,
-                                 @Nullable ViewGroup container,
-                                 @Nullable Bundle savedInstanceState) {
-            final View dialogView = inflater.inflate(R.layout.full_screen_dialog, container, false);
-
-            setupWheelPickers(dialogView);
-
-            EditText timerName = dialogView.findViewById(R.id.name_of_timer);
+        private void addTimerName(View view) {
+            EditText timerName = view.findViewById(R.id.name_of_timer);
             timerName.setOnKeyListener(new View.OnKeyListener() {
                 @Override
                 public boolean onKey(View view, int i, KeyEvent keyEvent) {
@@ -125,14 +117,28 @@ public class TimerFragment extends Fragment {
                     return true;
                 }
             });
+        }
 
-            ImageView addTimerIcon = dialogView.findViewById(R.id.button_add_timer);
+        private void addTimerIcon(View view) {
+            ImageView addTimerIcon = view.findViewById(R.id.button_add_timer);
             addTimerIcon.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View view) {
                     dialogFragment.dismissAllowingStateLoss();
                 }
             });
+        }
+
+        @Nullable
+        @Override
+        public View onCreateView(@NonNull LayoutInflater inflater,
+                                 @Nullable ViewGroup container,
+                                 @Nullable Bundle savedInstanceState) {
+            final View dialogView = inflater.inflate(R.layout.full_screen_dialog, container, false);
+
+            setupWheelPickers(dialogView);
+            addTimerName(dialogView);
+            addTimerIcon(dialogView);
 
             return dialogView;
         }
