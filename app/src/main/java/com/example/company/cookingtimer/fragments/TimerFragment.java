@@ -22,6 +22,8 @@ import android.widget.TextView;
 
 import com.example.company.cookingtimer.R;
 
+import java.util.ArrayList;
+
 /**
  * A simple {@link Fragment} subclass.
  */
@@ -51,6 +53,16 @@ public class TimerFragment extends Fragment {
         });
     }
 
+    private static String[] addArrayString(int numberOfArrayCounts) {
+        String[] arrayString = new String[numberOfArrayCounts];
+        int x=0;
+        for (int i = 0; i <= numberOfArrayCounts-1; i++){
+            arrayString[i] = Integer.toString(x);
+            x++;
+        }
+        return arrayString;
+    }
+
     public static class CustomDialogFragment extends DialogFragment {
         public CustomDialogFragment() {
             //Empty
@@ -58,21 +70,22 @@ public class TimerFragment extends Fragment {
 
         private void setupWheelPickers(View view) {
             // Setup Hourly wheel picker
-            String[] wheelPickerHourlyValue = new String[]{"0","1","2","3"};
+            String[] wheelPickerHourlyValue = addArrayString(24);
+
             NumberPicker wheelPickerHourly = view.findViewById(R.id.wheel_picker_hourly);
             wheelPickerHourly.setMinValue(0);
             wheelPickerHourly.setMaxValue(wheelPickerHourlyValue.length-1);
             wheelPickerHourly.setDisplayedValues(wheelPickerHourlyValue);
 
             // Setup Minutes wheel picker
-            String[] wheelPickerMinValue = new String[]{"0","1","2","3"};
+            String[] wheelPickerMinValue = addArrayString(60);
             NumberPicker wheelPickerMin = view.findViewById(R.id.wheel_picker_min);
             wheelPickerMin.setMinValue(0);
             wheelPickerMin.setMaxValue(wheelPickerMinValue.length-1);
             wheelPickerMin.setDisplayedValues(wheelPickerMinValue);
 
             // Setup Sec wheel picker
-            String[] wheelPickerSecValue = new String[]{"0","1","2","3"};
+            String[] wheelPickerSecValue = addArrayString(60);
             NumberPicker wheelPickerSec = view.findViewById(R.id.wheel_picker_sec);
             wheelPickerSec.setMinValue(0);
             wheelPickerSec.setMaxValue(wheelPickerSecValue.length-1);
