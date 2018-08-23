@@ -10,7 +10,6 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.AttributeSet;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,9 +24,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.company.cookingtimer.R;
-import com.example.company.cookingtimer.activities.MainActivity;
-
-import java.util.ArrayList;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -60,12 +56,12 @@ public class TimerFragment extends Fragment {
         });
     }
 
-    private static String[] addArrayString(int numberOfArrayCounts) {
+    private static String[] addArrayString(int numberOfArrayCounts, int incremental) {
         String[] arrayString = new String[numberOfArrayCounts];
         int x = 0;
         for (int i = 0; i <= numberOfArrayCounts - 1; i++) {
             arrayString[i] = Integer.toString(x);
-            x++;
+            x += incremental;
         }
         return arrayString;
     }
@@ -87,7 +83,7 @@ public class TimerFragment extends Fragment {
 
         private void setupWheelPickers(View view) {
             // Setup Hourly wheel picker
-            String[] wheelPickerHourlyValue = addArrayString(24);
+            String[] wheelPickerHourlyValue = addArrayString(24, 1);
 
             NumberPicker wheelPickerHourly = view.findViewById(R.id.wheel_picker_hourly);
             wheelPickerHourly.setMinValue(0);
@@ -95,14 +91,14 @@ public class TimerFragment extends Fragment {
             wheelPickerHourly.setDisplayedValues(wheelPickerHourlyValue);
 
             // Setup Minutes wheel picker
-            String[] wheelPickerMinValue = addArrayString(60);
+            String[] wheelPickerMinValue = addArrayString(60, 1);
             NumberPicker wheelPickerMin = view.findViewById(R.id.wheel_picker_min);
             wheelPickerMin.setMinValue(0);
             wheelPickerMin.setMaxValue(wheelPickerMinValue.length - 1);
             wheelPickerMin.setDisplayedValues(wheelPickerMinValue);
 
             // Setup Sec wheel picker
-            String[] wheelPickerSecValue = addArrayString(60);
+            String[] wheelPickerSecValue = addArrayString(12, 5);
             NumberPicker wheelPickerSec = view.findViewById(R.id.wheel_picker_sec);
             wheelPickerSec.setMinValue(0);
             wheelPickerSec.setMaxValue(wheelPickerSecValue.length - 1);
