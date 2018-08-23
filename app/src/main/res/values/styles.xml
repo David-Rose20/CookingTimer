@@ -8,8 +8,11 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!-- Style for NumberPicker: override text size -->
     <style name="NumberPickerText">
         <item name="android:textSize">30dp</item>
         <item name="android:colorAccent">@color/colorAccent</item>
     </style>
+
+
 </resources>
