@@ -11,16 +11,21 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.util.AttributeSet;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.company.cookingtimer.R;
+import com.example.company.cookingtimer.activities.MainActivity;
 
 import java.util.ArrayList;
 
@@ -30,6 +35,7 @@ import java.util.ArrayList;
 public class TimerFragment extends Fragment {
 
     static CustomDialogFragment dialogFragment;
+
 
     public TimerFragment() {
         // Required empty public constructor
@@ -68,6 +74,14 @@ public class TimerFragment extends Fragment {
             //Empty
         }
 
+        public void hideKeyboard() {
+            View thisView = getActivity().getCurrentFocus();
+            if (thisView != null) {
+                InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(thisView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            }
+        }
+
         private void setupWheelPickers(View view) {
             // Setup Hourly wheel picker
             String[] wheelPickerHourlyValue = addArrayString(24);
@@ -97,12 +111,23 @@ public class TimerFragment extends Fragment {
         public View onCreateView(@NonNull LayoutInflater inflater,
                                  @Nullable ViewGroup container,
                                  @Nullable Bundle savedInstanceState) {
-            View dialogView = inflater.inflate(R.layout.full_screen_dialog, container, false);
+            final View dialogView = inflater.inflate(R.layout.full_screen_dialog, container, false);
 
             setupWheelPickers(dialogView);
 
-            Button closeDialog = dialogView.findViewById(R.id.close);
-            closeDialog.setOnClickListener(new View.OnClickListener() {
+            EditText timerName = dialogView.findViewById(R.id.name_of_timer);
+            timerName.setOnKeyListener(new View.OnKeyListener() {
+                @Override
+                public boolean onKey(View view, int i, KeyEvent keyEvent) {
+                    if (i == 66){
+                        hideKeyboard();
+                    }
+                    return true;
+                }
+            });
+
+            ImageView addTimerIcon = dialogView.findViewById(R.id.button_add_timer);
+            addTimerIcon.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View view) {
                     dialogFragment.dismissAllowingStateLoss();
