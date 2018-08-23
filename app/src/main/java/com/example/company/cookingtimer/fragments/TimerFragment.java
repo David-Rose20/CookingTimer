@@ -44,7 +44,8 @@ public class TimerFragment extends Fragment {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.list_view_layout, container, false);
+        View rootView = inflater.inflate(R.layout.list_view_layout,
+                container, false);
         setupAddTimerButton(rootView);
         return rootView;
     }
@@ -61,8 +62,8 @@ public class TimerFragment extends Fragment {
 
     private static String[] addArrayString(int numberOfArrayCounts) {
         String[] arrayString = new String[numberOfArrayCounts];
-        int x=0;
-        for (int i = 0; i <= numberOfArrayCounts-1; i++){
+        int x = 0;
+        for (int i = 0; i <= numberOfArrayCounts - 1; i++) {
             arrayString[i] = Integer.toString(x);
             x++;
         }
@@ -77,8 +78,10 @@ public class TimerFragment extends Fragment {
         public void hideKeyboard() {
             View thisView = getActivity().getCurrentFocus();
             if (thisView != null) {
-                InputMethodManager inputManager = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-                inputManager.hideSoftInputFromWindow(thisView.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+                InputMethodManager inputManager = (InputMethodManager) getActivity()
+                        .getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputManager.hideSoftInputFromWindow(thisView.getWindowToken(),
+                        InputMethodManager.HIDE_NOT_ALWAYS);
             }
         }
 
@@ -88,21 +91,21 @@ public class TimerFragment extends Fragment {
 
             NumberPicker wheelPickerHourly = view.findViewById(R.id.wheel_picker_hourly);
             wheelPickerHourly.setMinValue(0);
-            wheelPickerHourly.setMaxValue(wheelPickerHourlyValue.length-1);
+            wheelPickerHourly.setMaxValue(wheelPickerHourlyValue.length - 1);
             wheelPickerHourly.setDisplayedValues(wheelPickerHourlyValue);
 
             // Setup Minutes wheel picker
             String[] wheelPickerMinValue = addArrayString(60);
             NumberPicker wheelPickerMin = view.findViewById(R.id.wheel_picker_min);
             wheelPickerMin.setMinValue(0);
-            wheelPickerMin.setMaxValue(wheelPickerMinValue.length-1);
+            wheelPickerMin.setMaxValue(wheelPickerMinValue.length - 1);
             wheelPickerMin.setDisplayedValues(wheelPickerMinValue);
 
             // Setup Sec wheel picker
             String[] wheelPickerSecValue = addArrayString(60);
             NumberPicker wheelPickerSec = view.findViewById(R.id.wheel_picker_sec);
             wheelPickerSec.setMinValue(0);
-            wheelPickerSec.setMaxValue(wheelPickerSecValue.length-1);
+            wheelPickerSec.setMaxValue(wheelPickerSecValue.length - 1);
             wheelPickerSec.setDisplayedValues(wheelPickerSecValue);
         }
 
@@ -111,7 +114,7 @@ public class TimerFragment extends Fragment {
             timerName.setOnKeyListener(new View.OnKeyListener() {
                 @Override
                 public boolean onKey(View view, int i, KeyEvent keyEvent) {
-                    if (i == 66){
+                    if (i == 66) {
                         hideKeyboard();
                     }
                     return true;
@@ -121,7 +124,7 @@ public class TimerFragment extends Fragment {
 
         private void addTimerIcon(View view) {
             ImageView addTimerIcon = view.findViewById(R.id.button_add_timer);
-            addTimerIcon.setOnClickListener(new View.OnClickListener(){
+            addTimerIcon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     dialogFragment.dismissAllowingStateLoss();
@@ -134,7 +137,8 @@ public class TimerFragment extends Fragment {
         public View onCreateView(@NonNull LayoutInflater inflater,
                                  @Nullable ViewGroup container,
                                  @Nullable Bundle savedInstanceState) {
-            final View dialogView = inflater.inflate(R.layout.full_screen_dialog, container, false);
+            final View dialogView = inflater.inflate(R.layout.full_screen_dialog,
+                    container, false);
 
             setupWheelPickers(dialogView);
             addTimerName(dialogView);
