@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/white"
+    xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/rLayout"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@android:color/white">
+
+        <TextView
+            android:id="@+id/txt_label_set_your_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_horizontal"
+            android:textSize="22sp"
+            android:padding="16dp"
+            android:text="@string/title_set_your_timer"/>
+
+        <EditText
+            android:id="@+id/name_of_timer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:textSize="22sp"
+            android:inputType="textCapCharacters"
+            android:textAllCaps="true"
+            android:hint="Name of this timer"
+            />
+
+        <LinearLayout
+            android:id="@+id/txt_wheelpicker_label"
+            android:layout_alignTop="@id/txt_label_set_your_time"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:paddingBottom="20dp"
+            android:textAlignment="center">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginBottom="-20dp"
+                android:layout_marginTop="10dp"
+                android:padding="16dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    android:text="@string/wheel_picker_text_hour"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    android:text="@string/wheel_picker_text_minute"/>
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textAlignment="center"
+                    android:text="@string/wheel_picker_text_second"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:orientation="horizontal">
+
+                <NumberPicker
+                    android:id="@+id/wheel_picker_hourly"
+                    android:layout_width="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_height="180dp"
+                    android:focusableInTouchMode="true"
+                    android:theme="@style/NumberPickerText"/>
+
+                <NumberPicker
+                    android:id="@+id/wheel_picker_min"
+                    android:layout_width="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_height="180dp"
+                    android:focusableInTouchMode="true"
+                    android:theme="@style/NumberPickerText"/>
+
+                <NumberPicker
+                    android:id="@+id/wheel_picker_sec"
+                    android:layout_width="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_height="180dp"
+                    android:focusableInTouchMode="true"
+                    android:theme="@style/NumberPickerText"/>
+            </LinearLayout>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/camera_icon"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="-10dp"
+                android:text="Take a picture"/>
+
+            <ImageView
+                android:id="@+id/button_add_timer"
+                android:layout_marginTop="50dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/timer_add_icon"
+                android:scaleX="1.5"
+                android:scaleY="1.5"
+                android:padding="8dp"
+                android:tint="@color/colorAccent" />
+
+
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
