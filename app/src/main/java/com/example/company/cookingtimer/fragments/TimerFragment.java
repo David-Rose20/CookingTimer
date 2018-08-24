@@ -64,12 +64,12 @@ public class TimerFragment extends Fragment {
 
         timerListView.setEmptyView(emptyView);
 
-        timerList = new ArrayList<>();
-        timerList.add(new Timer("Timer title 1", 10000,
-                R.drawable.food_placeholder,1));
-
-        timerList.add(new Timer("Timer title 2", 20000,
-                R.drawable.pasta_placeholder, 2));
+//        timerList = new ArrayList<>();
+//        timerList.add(new Timer("Timer title 1", 10000,
+//                R.drawable.food_placeholder,1));
+//
+//        timerList.add(new Timer("Timer title 2", 20000,
+//                R.drawable.pasta_placeholder, 2));
 
         TimerAdapter timerAdapter = new TimerAdapter(getContext(), timerList);
         timerListView.setAdapter(timerAdapter);
