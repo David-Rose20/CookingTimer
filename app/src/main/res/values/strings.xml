@@ -1,3 +1,14 @@
 <resources>
     <string name="app_name">Cooking Timer</string>
+
+    <!--TimerFragment-->
+    <string name="no_timers_message">You don\'t have any timers yet</string>
+
+    <!--Miscellaneous-->
+    <string name="add">ADD</string>
+    <string name="timers">Timers</string>
+    <string name="wheel_picker_text_hour">Hour</string>
+    <string name="wheel_picker_text_minute">Minute</string>
+    <string name="wheel_picker_text_second">Second</string>
+    <string name="title_set_your_timer">Set your timer</string>
 </resources>
