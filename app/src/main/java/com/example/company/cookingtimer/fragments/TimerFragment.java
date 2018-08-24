@@ -1,14 +1,39 @@
 package com.example.company.cookingtimer.fragments;
 
 
+import android.app.Dialog;
+import android.content.Context;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 
+import com.example.company.cookingtimer.MainTimer;
 import com.example.company.cookingtimer.R;
+import com.example.company.cookingtimer.adapters.TimerAdapter;
+import com.example.company.cookingtimer.models.Timer;
+import com.example.company.cookingtimer.models.ViewContainer;
+import com.github.lzyzsd.circleprogress.DonutProgress;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -18,6 +43,7 @@ public class TimerFragment extends Fragment {
     ListView timerListView;
     List<Timer> timerList;
     View emptyView;
+    static CustomDialogFragment dialogFragment;
 
     private static final String TAG = "TimerFragment";
 
