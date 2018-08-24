@@ -20,6 +20,8 @@ import com.example.company.cookingtimer.R;
 
 public class CustomDialogFragment extends DialogFragment {
 
+    public static CustomDialogFragment dialogFragment;
+
     private static String[] addArrayString(int numberOfArrayCounts, int incremental) {
         String[] arrayString = new String[numberOfArrayCounts];
         int x = 0;
