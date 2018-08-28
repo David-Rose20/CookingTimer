@@ -8,9 +8,9 @@ public class ViewContainer {
 
     private DonutProgress mDonutProgress;
     private TextView mTimeTextView;
-    private int mTimerId;
+    private long mTimerId;
 
-    public ViewContainer(DonutProgress donutProgress, TextView timeTextView, int timerId){
+    public ViewContainer(DonutProgress donutProgress, TextView timeTextView, long timerId){
         mDonutProgress = donutProgress;
         mTimeTextView = timeTextView;
         mTimerId = timerId;
@@ -24,7 +24,7 @@ public class ViewContainer {
         return mTimeTextView;
     }
 
-    public int getmTimerId(){
+    public long getmTimerId(){
         return mTimerId;
     }
 }

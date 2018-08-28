@@ -50,20 +50,30 @@ public class ServiceManager {
                     viewContainer.getTimeTextView(), timeInMillis, 1);
 
             context.startService(intent);
-        } else if (!timerService2.isServiceRunning()){
-            Intent intent = new Intent(context, TimerService2.class);
-            int timeInMillis = timer.getTimeInMillis();
-            String timerName = timer.getTimerName();
-
-            intent.putExtra(TIMER_TITLE, timerName);
-            intent.putExtra(TIMER_LENGTH, timeInMillis);
-
-            mainActivity.testFunctionality(viewContainer.getDonutProgressView(),
-                    viewContainer.getTimeTextView(), timeInMillis, 2);
-
-            context.startService(intent);
+            // TODO manage timers
+//        } else if (!timerService2.isServiceRunning()){
+//            Intent intent = new Intent(context, TimerService2.class);
+//            int timeInMillis = timer.getTimeInMillis();
+//            String timerName = timer.getTimerName();
+//
+//            intent.putExtra(TIMER_TITLE, timerName);
+//            intent.putExtra(TIMER_LENGTH, timeInMillis);
+//
+//            mainActivity.testFunctionality(viewContainer.getDonutProgressView(),
+//                    viewContainer.getTimeTextView(), timeInMillis, 2);
+//
+//            context.startService(intent);
         } else{
-            Toast.makeText(context, "Only two timers supported now", Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "Only one timer supported now", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public static boolean isServiceAvailable(){
+        TimerService timerService = new TimerService();
+        if (timerService.isServiceRunning()){
+            return false;
+        } else {
+            return true;
         }
     }
 }

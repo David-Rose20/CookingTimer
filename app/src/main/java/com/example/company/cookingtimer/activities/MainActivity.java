@@ -1,23 +1,38 @@
 package com.example.company.cookingtimer.activities;
 
-import android.os.Binder;
+import android.arch.persistence.room.Room;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
+import android.support.annotation.NonNull;
 import android.support.design.widget.TabLayout;
+import android.support.v4.content.LocalBroadcastManager;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TimeUtils;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.widget.TextView;
+
 import com.example.company.cookingtimer.R;
+import com.example.company.cookingtimer.adapters.TimerAdapter;
 import com.example.company.cookingtimer.adapters.ViewPagerAdapter;
-import com.example.company.cookingtimer.services.TimerService;
+import com.example.company.cookingtimer.fragments.TimerFragment;
+import com.example.company.cookingtimer.models.Timer;
 import com.example.company.cookingtimer.services.TimerService2;
 import com.github.lzyzsd.circleprogress.DonutProgress;
+
+import java.text.SimpleDateFormat;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
     private ViewPager viewPager;
+    BroadcastReceiver broadcastReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,7 +42,11 @@ public class MainActivity extends AppCompatActivity {
 
         initializeViews();
         setupAdapters();
+//        localBroadcastReceiver();
+//        LocalBroadcastManager.getInstance(this).registerReceiver(broadcastReceiver, new IntentFilter("custom"));
     }
+
+
 
     private void initializeViews() {
         viewPager = findViewById(R.id.view_pager);
@@ -38,6 +57,32 @@ public class MainActivity extends AppCompatActivity {
         ViewPagerAdapter pagerAdapter = new ViewPagerAdapter(this, getSupportFragmentManager());
         viewPager.setAdapter(pagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
+    }
+
+//    private void localBroadcastReceiver(){
+//
+//        broadcastReceiver = new BroadcastReceiver() {
+//            @Override
+//            public void onReceive(Context context, Intent intent) {
+//                long id = intent.getLongExtra("service-1", 0);
+//                Log.d(TAG, "onReceive: id: " + id);
+//            }
+//        };
+//    }
+
+    public class Bridge extends TimerAdapter{
+
+        public Bridge(@NonNull Context context, List<Timer> timerList) {
+            super(context, timerList);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            Timer timer = getItem(position);
+            Log.d(TAG, "getItemId: " + timer.getTimeInMillis());
+            return super.getItemId(position);
+
+        }
     }
 
     /**
@@ -56,26 +101,26 @@ public class MainActivity extends AppCompatActivity {
         switch (id) {
 
             case 1:
-                final TimerService timerService = new TimerService();
-                new Thread() {
-                    public void run() {
-                        do {
-                            runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    float progressRemaining = (float) timerLengthInMilliSeconds - timerService.getTimeRemainingFromService();
-                                    progress.setProgress(progressRemaining);
-
-                                    int timeRemaining = (int) timerService.getTimeRemainingFromService()/1000;
-                                    timeTextView.setText(formatTime(timeRemaining));
-                                }
-                            });
-                            threadSleep(300);
-                        }
-                        while (timerService.isServiceRunning());
-
-                    }
-                }.start();
+//                final TimerService timerService = new TimerService();
+//                new Thread() {
+//                    public void run() {
+//                        do {
+//                            runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    float progressRemaining = (float) timerLengthInMilliSeconds - timerService.getTimeRemainingFromService();
+//                                    progress.setProgress(progressRemaining);
+//
+//                                    int timeRemaining = (int) timerService.getTimeRemainingFromService()/1000;
+//                                    timeTextView.setText(getFormattedTime(timeRemaining));
+//                                }
+//                            });
+//                            threadSleep(300);
+//                        }
+//                        while (timerService.isServiceRunning());
+//
+//                    }
+//                }.start();
                 break;
 
             case 2:
@@ -120,4 +165,10 @@ public class MainActivity extends AppCompatActivity {
             return ("00:" + "00:" + "00");
         }
     }
+
+    //    @Override
+//    protected void onDestroy() {
+//        LocalBroadcastManager.getInstance(this).unregisterReceiver(broadcastReceiver);
+//        super.onDestroy();
+//    }
 }

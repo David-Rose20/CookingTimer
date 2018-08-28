@@ -6,18 +6,16 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
-import android.widget.TextView;
+import android.support.v4.content.LocalBroadcastManager;
 
 import com.example.company.cookingtimer.R;
+import com.example.company.cookingtimer.utils.TimerUtils;
 import com.example.company.cookingtimer.activities.MainActivity;
 import com.example.company.cookingtimer.broadcastReceivers.TimerBroadcastReceiver;
-import com.example.company.cookingtimer.models.ViewContainer;
-import com.github.lzyzsd.circleprogress.DonutProgress;
 
 
 import static com.example.company.cookingtimer.baseApp.BaseApp.CHANNEL_ID;
@@ -40,19 +38,23 @@ public class TimerService extends Service {
     private static final int NOTIFICATION_ID = 10;
     private static boolean isServiceRunning = false;
     private static int timerLengthMillis;
-    private static int timerLength;
     private static String timerName;
 
     private NotificationCompat.Builder builder;
     private Notification notification;
     private NotificationManager notificationManager;
+    private LocalBroadcastManager localBroadcastManager;
+    private TimerUtils timerUtils;
 
 
     @Override
     public void onCreate() {
         super.onCreate();
-
+        localBroadcastManager = LocalBroadcastManager.getInstance(getApplication());
+        timerUtils = TimerUtils.getInstance();
     }
+
+
 
     @Nullable
     @Override
@@ -109,9 +111,10 @@ public class TimerService extends Service {
             @Override
             public void onTick(long millisUntilFinished) {
                 timerLengthMillis = (int) millisUntilFinished;
-                int remainingTime = (int) millisUntilFinished/1000;
-                updateNotification(remainingTime);
-
+                updateNotification((int)millisUntilFinished);
+                Intent intent = new Intent("service-1");
+                intent.putExtra("id", millisUntilFinished);
+                localBroadcastManager.sendBroadcast(intent);
             }
 
             @Override
@@ -121,23 +124,14 @@ public class TimerService extends Service {
         }.start();
     }
 
-    private void updateNotification(long secondsLeft){
-        if (secondsLeft <= 9){
-            builder
-                    .setContentText("Time left: " +  "00:" + "00:" + "0" + secondsLeft).build();
-        }
-        else {
-            builder
-                    .setContentText("Time left: " +  "00:" + "00:"  + secondsLeft).build();
-        }
+
+    private void updateNotification(int durationInMillis) {
+        String formattedTime = timerUtils.getFormattedTime(durationInMillis);
+        builder.setContentText("" + formattedTime);
         notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
 
     public boolean isServiceRunning(){
         return isServiceRunning;
-    }
-
-    public long getTimeRemainingFromService(){
-        return timerLengthMillis;
     }
 }

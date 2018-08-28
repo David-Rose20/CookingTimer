@@ -1,14 +1,48 @@
 package com.example.company.cookingtimer.fragments;
 
 
+import android.app.Dialog;
+
+import android.arch.persistence.room.Room;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
+import android.support.v4.content.LocalBroadcastManager;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.company.cookingtimer.services.ServiceManager;
+import com.example.company.cookingtimer.utils.TimerUtils;
+import com.example.company.cookingtimer.room.AppDatabase;
+import com.example.company.cookingtimer.MainTimer;
 import com.example.company.cookingtimer.R;
+import com.example.company.cookingtimer.adapters.TimerAdapter;
+import com.example.company.cookingtimer.models.Timer;
+import com.example.company.cookingtimer.models.ViewContainer;
+import com.github.lzyzsd.circleprogress.DonutProgress;
+
+import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -16,15 +50,24 @@ import com.example.company.cookingtimer.R;
 public class TimerFragment extends Fragment {
 
     ListView timerListView;
-    List<Timer> timerList;
     View emptyView;
+    static CustomDialogFragment dialogFragment;
+
+    TimerAdapter timerAdapter;
+    TimerUtils timerUtils;
 
     private static final String TAG = "TimerFragment";
 
     public TimerFragment() {
         // Required empty public constructor
+
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -33,48 +76,101 @@ public class TimerFragment extends Fragment {
                 container, false);
 
 
+        Log.d(TAG, "onCreateView: ONCREATEVIEW");
+
         initializeViews(rootView);
         setupAddTimerButton(rootView);
 
+        timerUtils = TimerUtils.getInstance();
         timerListView.setEmptyView(emptyView);
 
-        timerList = new ArrayList<>();
-        timerList.add(new Timer("Timer title 1", 10000,
-                R.drawable.food_placeholder,1));
+        AppDatabase database = Room.databaseBuilder(getContext(), AppDatabase.class, "db-timers")
+                .allowMainThreadQueries()
+                .build();
+        final List<Timer> dbTimerList = database.getMyTimerDAO().getMyTimers();
 
-        timerList.add(new Timer("Timer title 2", 20000,
-                R.drawable.pasta_placeholder, 2));
-
-        TimerAdapter timerAdapter = new TimerAdapter(getContext(), timerList);
+        timerAdapter = new TimerAdapter(getContext(), dbTimerList);
+        timerAdapter.setNotifyOnChange(true);
         timerListView.setAdapter(timerAdapter);
 
         timerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Log.d(TAG, "onItemClick: ");
-                Timer currentTimer = timerList.get(position);
-                MainTimer mainTimer = new MainTimer(getContext());
-                ViewContainer viewContainer = createViewContainer(view, currentTimer.getTimerId());
-                mainTimer.startTimer(currentTimer, viewContainer);
+                if (ServiceManager.isServiceAvailable()) {
+                    Timer currentTimer = dbTimerList.get(position);
+                    MainTimer mainTimer = new MainTimer(getContext());
+                    ViewContainer viewContainer = createViewContainer(view, id);
+
+                    DonutProgress donutProgress = view.findViewById(R.id.timer_donut_progress);
+                    TextView timeTextView = view.findViewById(R.id.timer_time_left_text);
+
+                    ServiceBridge serviceBridge = new ServiceBridge();
+                    serviceBridge.testViewHolder(donutProgress, timeTextView, currentTimer.getTimeInMillis());
+                    mainTimer.startTimer(currentTimer, viewContainer);
+                } else {
+                    Toast.makeText(getContext(), "Only one timer supported now", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         return rootView;
     }
 
-    private ViewContainer createViewContainer(View view, int viewId){
+    private void initializeViews(View rootView) {
+        timerListView = rootView.findViewById(R.id.list_view);
+        emptyView = rootView.findViewById(R.id.empty_timer_view);
+    }
+
+    private class ServiceBridge {
+
+        DonutProgress progress;
+        TextView timeTextView;
+        long timerLengthInMilliSeconds;
+        BroadcastReceiver broadcastReceiver;
+
+        private void testViewHolder(DonutProgress progress, TextView timeTextView, long timerLengthInMilliSeconds) {
+            this.progress = progress;
+            this.timeTextView = timeTextView;
+            this.timerLengthInMilliSeconds = timerLengthInMilliSeconds;
+            localBroadcastReceiver();
+            LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, new IntentFilter("service-1"));
+        }
+
+        private void updateViews(long timeLeftInMillis) {
+            float progressRemaining = (float) timerLengthInMilliSeconds - timeLeftInMillis;
+            progress.setProgress(progressRemaining);
+
+            timeTextView.setText(formatTime((int)timeLeftInMillis));
+        }
+
+        private String formatTime(int durationInMillis) {
+            return timerUtils.getFormattedTime(durationInMillis);
+        }
+
+        private void localBroadcastReceiver() {
+
+            Log.d(TAG, "localBroadcastReceiver: ");
+            broadcastReceiver = new BroadcastReceiver() {
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    long timeLeftInMillis = intent.getLongExtra("id", 0);
+                    Log.d(TAG, "onReceive: id: " + timeLeftInMillis);
+                    updateViews(timeLeftInMillis);
+                }
+            };
+        }
+    }
+
+
+    private ViewContainer createViewContainer(View view, long viewId) {
         DonutProgress donutProgress = view.findViewById(R.id.timer_donut_progress);
         TextView timeLeftText = view.findViewById(R.id.timer_time_left_text);
 
         return new ViewContainer(donutProgress, timeLeftText, viewId);
     }
 
-    private void initializeViews(View rootView){
-        timerListView = rootView.findViewById(R.id.list_view);
-        emptyView = rootView.findViewById(R.id.empty_timer_view);
-    }
     private void setupAddTimerButton(View rv) {
-        Button addTimerButton = rv.findViewById(R.id.button_add_timer);
+        FloatingActionButton addTimerButton = rv.findViewById(R.id.button_add_timer);
         addTimerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -92,6 +188,7 @@ public class TimerFragment extends Fragment {
         }
         return arrayString;
     }
+
 
     public static class CustomDialogFragment extends DialogFragment {
         public CustomDialogFragment() {
@@ -147,9 +244,13 @@ public class TimerFragment extends Fragment {
 
         private void addTimerIcon(View view) {
             ImageView addTimerIcon = view.findViewById(R.id.button_add_timer);
+            final NumberPicker wheelPickerSec = view.findViewById(R.id.wheel_picker_sec);
+            final EditText timerName = view.findViewById(R.id.name_of_timer);
+            final NumberPicker wheelPickerMin = view.findViewById(R.id.wheel_picker_min);
             addTimerIcon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
+                    saveToDatabase(timerName, wheelPickerSec, wheelPickerMin);
                     dialogFragment.dismissAllowingStateLoss();
                 }
             });
@@ -179,6 +280,24 @@ public class TimerFragment extends Fragment {
             return dialog;
         }
 
+        // ----- Test db  ------
+        private void saveToDatabase(EditText timerName, NumberPicker wheelPickerSec, NumberPicker wheelPickerMin){
+            int seconds = wheelPickerSec.getValue() * 1000 * 5;
+            int minutes = wheelPickerMin.getValue() * 1000 * 60;
+            int timeInMillis = seconds + minutes;
+            Log.d(TAG, "saveToDatabase: seconds val: " + seconds);
+            String name = timerName.getText().toString();
+            Timer timer = new Timer();
+            timer.setTimerName(name);
+            timer.setTimeInMillis(timeInMillis);
+
+            AppDatabase database = Room.databaseBuilder(getContext(), AppDatabase.class, "db-timers")
+                    .allowMainThreadQueries()
+                    .build();
+            database.getMyTimerDAO().insert(timer);
+            // TODO update ListView
+        }
+
     }
 
     private void showAddTimerDialog() {
@@ -191,4 +310,8 @@ public class TimerFragment extends Fragment {
         transaction.add(android.R.id.content, dialogFragment).addToBackStack(null).commit();
     }
 
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+    }
 }

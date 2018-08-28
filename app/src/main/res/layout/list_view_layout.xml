@@ -4,11 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/linearLayout"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+
 
         <ListView
             android:id="@+id/list_view"
@@ -17,7 +13,7 @@
 
         </ListView>
 
-    </LinearLayout>
+
 
     <LinearLayout
         android:id="@+id/empty_timer_view"
@@ -25,8 +21,6 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical">
-
-        <!--Icon is from pixabay. Requires no attribution.-->
 
         <ImageView
             android:layout_width="150dp"
@@ -42,13 +36,24 @@
             android:text="@string/no_timers_message"
             android:textSize="16sp" />
 
-        <Button
-            android:id="@+id/button_add_timer"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/add" />
+        <!--<Button-->
+            <!--android:id="@+id/button_add_timer"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_marginTop="8dp"-->
+            <!--android:text="@string/add" />-->
 
     </LinearLayout>
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/button_add_timer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/ic_alarm_add"
+        android:layout_margin="24dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
 
 </android.support.constraint.ConstraintLayout>
