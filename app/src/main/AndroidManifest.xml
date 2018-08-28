@@ -3,6 +3,7 @@
     package="com.example.company.cookingtimer">
 
     <application
+        android:name=".baseApp.BaseApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -16,6 +17,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <service android:name=".services.TimerService"/>
+        <service android:name=".services.TimerService2"/>
+        <receiver android:name=".broadcastReceivers.TimerBroadcastReceiver"/>
     </application>
-
 </manifest>
