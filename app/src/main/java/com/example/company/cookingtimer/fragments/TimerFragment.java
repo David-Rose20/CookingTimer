@@ -4,10 +4,7 @@ package com.example.company.cookingtimer.fragments;
 import android.app.Dialog;
 
 import android.arch.persistence.room.Room;
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -16,7 +13,8 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -24,23 +22,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.NumberPicker;
-import android.widget.TextView;
-import android.widget.Toast;
 
+import com.example.company.cookingtimer.ServiceBridge;
+import com.example.company.cookingtimer.TimerClickInterface;
+import com.example.company.cookingtimer.adapters.TimerRecyclerAdapter;
 import com.example.company.cookingtimer.services.ServiceManager;
 import com.example.company.cookingtimer.utils.TimerUtils;
 import com.example.company.cookingtimer.room.AppDatabase;
-import com.example.company.cookingtimer.MainTimer;
+import com.example.company.cookingtimer.ApplicationTimer;
 import com.example.company.cookingtimer.R;
-import com.example.company.cookingtimer.adapters.TimerAdapter;
 import com.example.company.cookingtimer.models.Timer;
-import com.example.company.cookingtimer.models.ViewContainer;
-import com.github.lzyzsd.circleprogress.DonutProgress;
 
 import java.util.List;
 
@@ -49,12 +43,15 @@ import java.util.List;
  */
 public class TimerFragment extends Fragment {
 
-    ListView timerListView;
     View emptyView;
     static CustomDialogFragment dialogFragment;
 
-    TimerAdapter timerAdapter;
+    TimerRecyclerAdapter recyclerAdapter;
     TimerUtils timerUtils;
+
+    RecyclerView recyclerView;
+    ServiceBridge serviceBridge;
+    List<Timer> dbTimerList;
 
     private static final String TAG = "TimerFragment";
 
@@ -66,7 +63,6 @@ public class TimerFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
     }
 
     @Override
@@ -75,101 +71,31 @@ public class TimerFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.list_view_layout,
                 container, false);
 
-
-        Log.d(TAG, "onCreateView: ONCREATEVIEW");
-
         initializeViews(rootView);
-        setupAddTimerButton(rootView);
-
-        timerUtils = TimerUtils.getInstance();
-        timerListView.setEmptyView(emptyView);
-
-        AppDatabase database = Room.databaseBuilder(getContext(), AppDatabase.class, "db-timers")
-                .allowMainThreadQueries()
-                .build();
-        final List<Timer> dbTimerList = database.getMyTimerDAO().getMyTimers();
-
-        timerAdapter = new TimerAdapter(getContext(), dbTimerList);
-        timerAdapter.setNotifyOnChange(true);
-        timerListView.setAdapter(timerAdapter);
-
-        timerListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (ServiceManager.isServiceAvailable()) {
-                    Timer currentTimer = dbTimerList.get(position);
-                    MainTimer mainTimer = new MainTimer(getContext());
-                    ViewContainer viewContainer = createViewContainer(view, id);
-
-                    DonutProgress donutProgress = view.findViewById(R.id.timer_donut_progress);
-                    TextView timeTextView = view.findViewById(R.id.timer_time_left_text);
-
-                    ServiceBridge serviceBridge = new ServiceBridge();
-                    serviceBridge.testViewHolder(donutProgress, timeTextView, currentTimer.getTimeInMillis());
-                    mainTimer.startTimer(currentTimer, viewContainer);
-                } else {
-                    Toast.makeText(getContext(), "Only one timer supported now", Toast.LENGTH_SHORT).show();
-                }
-            }
-        });
+        setupAddTimerFab(rootView);
+        initializeDataBase();
+        createRecyclerAdapter();
+        setupRecyclerView();
 
         return rootView;
     }
 
     private void initializeViews(View rootView) {
-        timerListView = rootView.findViewById(R.id.list_view);
         emptyView = rootView.findViewById(R.id.empty_timer_view);
+        recyclerView = rootView.findViewById(R.id.recycler_view);
+        timerUtils = TimerUtils.getInstance();
+        serviceBridge = ServiceBridge.getInstance();
     }
 
-    private class ServiceBridge {
+    private void initializeDataBase(){
+        final AppDatabase database = Room.databaseBuilder(getContext(), AppDatabase.class, "db-timers")
+                .allowMainThreadQueries()
+                .build();
 
-        DonutProgress progress;
-        TextView timeTextView;
-        long timerLengthInMilliSeconds;
-        BroadcastReceiver broadcastReceiver;
-
-        private void testViewHolder(DonutProgress progress, TextView timeTextView, long timerLengthInMilliSeconds) {
-            this.progress = progress;
-            this.timeTextView = timeTextView;
-            this.timerLengthInMilliSeconds = timerLengthInMilliSeconds;
-            localBroadcastReceiver();
-            LocalBroadcastManager.getInstance(getContext()).registerReceiver(broadcastReceiver, new IntentFilter("service-1"));
-        }
-
-        private void updateViews(long timeLeftInMillis) {
-            float progressRemaining = (float) timerLengthInMilliSeconds - timeLeftInMillis;
-            progress.setProgress(progressRemaining);
-
-            timeTextView.setText(formatTime((int)timeLeftInMillis));
-        }
-
-        private String formatTime(int durationInMillis) {
-            return timerUtils.getFormattedTime(durationInMillis);
-        }
-
-        private void localBroadcastReceiver() {
-
-            Log.d(TAG, "localBroadcastReceiver: ");
-            broadcastReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    long timeLeftInMillis = intent.getLongExtra("id", 0);
-                    Log.d(TAG, "onReceive: id: " + timeLeftInMillis);
-                    updateViews(timeLeftInMillis);
-                }
-            };
-        }
+        dbTimerList = database.getMyTimerDAO().getMyTimers();
     }
 
-
-    private ViewContainer createViewContainer(View view, long viewId) {
-        DonutProgress donutProgress = view.findViewById(R.id.timer_donut_progress);
-        TextView timeLeftText = view.findViewById(R.id.timer_time_left_text);
-
-        return new ViewContainer(donutProgress, timeLeftText, viewId);
-    }
-
-    private void setupAddTimerButton(View rv) {
+    private void setupAddTimerFab(View rv) {
         FloatingActionButton addTimerButton = rv.findViewById(R.id.button_add_timer);
         addTimerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -177,6 +103,30 @@ public class TimerFragment extends Fragment {
                 showAddTimerDialog();
             }
         });
+    }
+
+    private void createRecyclerAdapter(){
+        recyclerAdapter = new TimerRecyclerAdapter(getContext(), dbTimerList, new TimerClickInterface() {
+            @Override
+            public void onItemClicked(View view, int position) {
+                if (ServiceManager.isServiceAvailable()) {
+                    Timer currentTimer = dbTimerList.get(position);
+
+                    ApplicationTimer applicationTimer = new ApplicationTimer(getContext());
+                    applicationTimer.startTimer(view, currentTimer);
+                }
+            }
+        });
+    }
+
+    private void setupRecyclerView(){
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(recyclerAdapter);
+        if (recyclerAdapter.getItemCount() > 0) {
+            emptyView.setVisibility(View.GONE);
+        }
     }
 
     private static String[] addArrayString(int numberOfArrayCounts, int incremental) {
@@ -244,13 +194,14 @@ public class TimerFragment extends Fragment {
 
         private void addTimerIcon(View view) {
             ImageView addTimerIcon = view.findViewById(R.id.button_add_timer);
-            final NumberPicker wheelPickerSec = view.findViewById(R.id.wheel_picker_sec);
             final EditText timerName = view.findViewById(R.id.name_of_timer);
+            final NumberPicker wheelPickerSec = view.findViewById(R.id.wheel_picker_sec);
             final NumberPicker wheelPickerMin = view.findViewById(R.id.wheel_picker_min);
+            final NumberPicker wheelPickerHour = view.findViewById(R.id.wheel_picker_hourly);
             addTimerIcon.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    saveToDatabase(timerName, wheelPickerSec, wheelPickerMin);
+                    saveToDatabase(timerName, wheelPickerSec, wheelPickerMin, wheelPickerHour);
                     dialogFragment.dismissAllowingStateLoss();
                 }
             });
@@ -280,12 +231,15 @@ public class TimerFragment extends Fragment {
             return dialog;
         }
 
-        // ----- Test db  ------
-        private void saveToDatabase(EditText timerName, NumberPicker wheelPickerSec, NumberPicker wheelPickerMin){
-            int seconds = wheelPickerSec.getValue() * 1000 * 5;
+        private void saveToDatabase(EditText timerName, NumberPicker wheelPickerSec,
+                                    NumberPicker wheelPickerMin, NumberPicker wheelPickerHour){
+            int seconds = wheelPickerSec.getValue();
             int minutes = wheelPickerMin.getValue() * 1000 * 60;
-            int timeInMillis = seconds + minutes;
-            Log.d(TAG, "saveToDatabase: seconds val: " + seconds);
+            int hours = wheelPickerHour.getValue() * 1000 * 60 * 60;
+            if (seconds != 0){
+                seconds += 1000 * 5;
+            }
+            int timeInMillis = seconds + minutes + hours;
             String name = timerName.getText().toString();
             Timer timer = new Timer();
             timer.setTimerName(name);
@@ -295,9 +249,9 @@ public class TimerFragment extends Fragment {
                     .allowMainThreadQueries()
                     .build();
             database.getMyTimerDAO().insert(timer);
+
             // TODO update ListView
         }
-
     }
 
     private void showAddTimerDialog() {

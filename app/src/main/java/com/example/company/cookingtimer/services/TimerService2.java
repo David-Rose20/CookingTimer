@@ -10,42 +10,46 @@ import android.os.CountDownTimer;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import com.example.company.cookingtimer.R;
 import com.example.company.cookingtimer.activities.MainActivity;
 import com.example.company.cookingtimer.broadcastReceivers.TimerBroadcastReceiver;
+import com.example.company.cookingtimer.utils.TimerUtils;
 
 import static com.example.company.cookingtimer.baseApp.BaseApp.CHANNEL_ID;
 
 
 public class TimerService2 extends Service{
 
-    private static final String TAG = "TimerService2";
-
 
     private static final int NOTIFICATION_ID = 20;
     private static boolean isServiceRunning = false;
     private static int timerLengthMillis;
-    private static int timerLength;
     private static String timerName;
 
     private NotificationCompat.Builder builder;
     private Notification notification;
     private NotificationManager notificationManager;
+    private LocalBroadcastManager localBroadcastManager;
+    private TimerUtils timerUtils;
 
 
     @Override
     public void onCreate() {
         super.onCreate();
+        localBroadcastManager = LocalBroadcastManager.getInstance(getApplication());
+        timerUtils = TimerUtils.getInstance();
     }
+
+
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
     }
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -58,8 +62,9 @@ public class TimerService2 extends Service{
     }
 
     private void getIntentExtras(Intent intent){
-        timerLength = intent.getIntExtra(ServiceManager.TIMER_LENGTH, 0);
+        timerLengthMillis = intent.getIntExtra(ServiceManager.TIMER_LENGTH, 0);
         timerName = intent.getStringExtra(ServiceManager.TIMER_TITLE);
+
     }
 
     private void createNotification(){
@@ -78,7 +83,7 @@ public class TimerService2 extends Service{
 
         startForeground(NOTIFICATION_ID, notification);
 
-        createCountDownTimer(timerLength);
+        createCountDownTimer(timerLengthMillis);
     }
 
     @Override
@@ -89,14 +94,16 @@ public class TimerService2 extends Service{
         super.onDestroy();
     }
 
-    private void createCountDownTimer(long timerLengthInMillis){
+    private void createCountDownTimer(final long timerLengthInMillis){
         new CountDownTimer(timerLengthInMillis, 1000){
 
             @Override
             public void onTick(long millisUntilFinished) {
-                timerLengthMillis = (int) millisUntilFinished;
-                int remainingTime = (int) millisUntilFinished/1000;
-                updateNotification(remainingTime);
+//                timerLengthMillis = (int) millisUntilFinished;
+                updateNotification((int)millisUntilFinished);
+                Intent intent = new Intent("service-2");
+                intent.putExtra("id", millisUntilFinished);
+                localBroadcastManager.sendBroadcast(intent);
             }
 
             @Override
@@ -106,15 +113,10 @@ public class TimerService2 extends Service{
         }.start();
     }
 
-    private void updateNotification(long secondsLeft){
-        if (secondsLeft <= 9){
-            builder
-                    .setContentText("Time left: " +  "00:" + "00:" + "0"  + secondsLeft).build();
-        }
-        else {
-            builder
-                    .setContentText("Time left: " +  "00:" + "00:"  + secondsLeft).build();
-        }
+
+    private void updateNotification(int durationInMillis) {
+        String formattedTime = timerUtils.getFormattedTime(durationInMillis);
+        builder.setContentText("" + formattedTime);
         notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
 
@@ -122,7 +124,11 @@ public class TimerService2 extends Service{
         return isServiceRunning;
     }
 
-    public long getTimeRemainingFromService(){
+    public String getTimerName(){
+        return timerName;
+    }
+
+    public int getTimerLengthMillis(){
         return timerLengthMillis;
     }
 }

@@ -1,12 +1,12 @@
 package com.example.company.cookingtimer.services;
 
+
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.widget.Toast;
 
-import com.example.company.cookingtimer.activities.MainActivity;
 import com.example.company.cookingtimer.models.Timer;
-import com.example.company.cookingtimer.models.ViewContainer;
 
 /**
  *
@@ -22,22 +22,19 @@ public class ServiceManager {
     public static final String TIMER_TITLE = "timer-title";
 
     private Context context;
-    private Timer timer;
-    private ViewContainer viewContainer;
+    String serviceAction;
 
-    public ServiceManager(Context context, Timer timer, ViewContainer viewContainer){
+
+    public ServiceManager(Context context) {
         this.context = context;
-        this.timer = timer;
-        this.viewContainer = viewContainer;
     }
 
-    public void startOpenService(){
+    public void startAvailableService(Timer timer) {
 
         TimerService timerService = new TimerService();
         TimerService2 timerService2 = new TimerService2();
 
-        MainActivity mainActivity = new MainActivity();
-        if (!timerService.isServiceRunning()){
+        if (!timerService.isServiceRunning()) {
             Intent intent = new Intent(context, TimerService.class);
 
             String timerName = timer.getTimerName();
@@ -46,31 +43,40 @@ public class ServiceManager {
             intent.putExtra(TIMER_TITLE, timerName);
             intent.putExtra(TIMER_LENGTH, timeInMillis);
 
-            mainActivity.testFunctionality(viewContainer.getDonutProgressView(),
-                    viewContainer.getTimeTextView(), timeInMillis, 1);
+            context.startService(intent);
+            setServiceAction("service-1");
+            // TODO manage timers
+        } else if (!timerService2.isServiceRunning()) {
+            Intent intent = new Intent(context, TimerService2.class);
+
+            String timerName = timer.getTimerName();
+            int timeInMillis = timer.getTimeInMillis();
+
+            intent.putExtra(TIMER_TITLE, timerName);
+            intent.putExtra(TIMER_LENGTH, timeInMillis);
+
+            Log.d(TAG, "startOpenService: ");
 
             context.startService(intent);
-            // TODO manage timers
-//        } else if (!timerService2.isServiceRunning()){
-//            Intent intent = new Intent(context, TimerService2.class);
-//            int timeInMillis = timer.getTimeInMillis();
-//            String timerName = timer.getTimerName();
-//
-//            intent.putExtra(TIMER_TITLE, timerName);
-//            intent.putExtra(TIMER_LENGTH, timeInMillis);
-//
-//            mainActivity.testFunctionality(viewContainer.getDonutProgressView(),
-//                    viewContainer.getTimeTextView(), timeInMillis, 2);
-//
-//            context.startService(intent);
-        } else{
+            setServiceAction("service-2");
+        } else {
             Toast.makeText(context, "Only one timer supported now", Toast.LENGTH_SHORT).show();
         }
     }
 
+    private void setServiceAction(String action){
+        serviceAction = action;
+    }
+
+    public String getServiceAction(){
+        return serviceAction;
+    }
+
+
     public static boolean isServiceAvailable(){
         TimerService timerService = new TimerService();
-        if (timerService.isServiceRunning()){
+        TimerService2 timerService2 = new TimerService2();
+        if (timerService.isServiceRunning() && timerService2.isServiceRunning()){
             return false;
         } else {
             return true;
