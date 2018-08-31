@@ -4,6 +4,8 @@ import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
+import java.util.List;
+
 @Entity(tableName = "timer")
 public class Timer {
 
@@ -12,17 +14,6 @@ public class Timer {
     private String mTimerName;
 
     private int mTimeInMillis;
-
-//    private int mTimerId;
-//    private int mImageResourceId;
-
-
-//    public Timer(String timerName, int timeInMillis, int imageResourceId, int timerId){
-//        mTimerName = timerName;
-//        mTimeInMillis = timeInMillis;
-//        mImageResourceId = imageResourceId;
-//        mTimerId = timerId;
-//    }
 
     public void setTimerName(String timerName){
         mTimerName = timerName;
@@ -41,11 +32,4 @@ public class Timer {
         return mTimeInMillis;
     }
 
-//    public int getTimerId() {
-//        return mTimerId;
-//    }
-
-//    public int getImageResourceId(){
-//        return mImageResourceId;
-//    }
 }

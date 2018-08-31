@@ -6,8 +6,11 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.CountDownTimer;
 import android.os.IBinder;
+import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.LocalBroadcastManager;
@@ -33,7 +36,6 @@ import static com.example.company.cookingtimer.baseApp.BaseApp.CHANNEL_ID;
 
 public class TimerService extends Service {
 
-    private static final String TAG = "TimerService";
 
     private static final int NOTIFICATION_ID = 10;
     private static boolean isServiceRunning = false;
@@ -88,6 +90,7 @@ public class TimerService extends Service {
         notification = builder
                 .setContentTitle(timerName)
                 .setContentText("")
+
                 .setSmallIcon(R.drawable.ic_action_clock)
                 .setContentIntent(pendingIntent)
                 .build();
@@ -110,7 +113,7 @@ public class TimerService extends Service {
 
             @Override
             public void onTick(long millisUntilFinished) {
-                timerLengthMillis = (int) millisUntilFinished;
+//                timerLengthMillis = (int) millisUntilFinished;
                 updateNotification((int)millisUntilFinished);
                 Intent intent = new Intent("service-1");
                 intent.putExtra("id", millisUntilFinished);
@@ -133,5 +136,13 @@ public class TimerService extends Service {
 
     public boolean isServiceRunning(){
         return isServiceRunning;
+    }
+
+    public String getTimerName(){
+        return timerName;
+    }
+
+    public int getTimerLengthMillis(){
+        return timerLengthMillis;
     }
 }

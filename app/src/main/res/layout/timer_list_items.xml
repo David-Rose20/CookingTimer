@@ -104,6 +104,7 @@
         android:orientation="horizontal">
 
         <ImageButton
+            android:id="@+id/timer_play_image_button"
             android:layout_width="36dp"
             android:layout_height="36dp"
             android:background="?selectableItemBackgroundBorderless"

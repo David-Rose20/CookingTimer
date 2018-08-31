@@ -3,10 +3,12 @@ package com.example.company.cookingtimer.adapters;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import com.example.company.cookingtimer.R;
@@ -21,8 +23,6 @@ public class TimerAdapter extends ArrayAdapter<Timer> {
 
     Context mContext;
     List<Timer> mTimerList;
-
-    View listItemView;
     ViewGroup parentView;
     TimerUtils timerUtils;
 
@@ -36,14 +36,14 @@ public class TimerAdapter extends ArrayAdapter<Timer> {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        listItemView = convertView;
+        View listItemView = convertView;
         parentView = parent;
 
         if (listItemView == null) {
             listItemView = LayoutInflater.from(getContext())
                     .inflate(R.layout.timer_list_items, parent, false);
         }
-        Timer currentTimer = getItem(position);
+        final Timer currentTimer = getItem(position);
 
 
         // Title
@@ -59,6 +59,14 @@ public class TimerAdapter extends ArrayAdapter<Timer> {
         // Image
         CircleImageView imageIcon = listItemView.findViewById(R.id.timer_circle_image);
         imageIcon.setImageDrawable(getContext().getDrawable(R.drawable.pasta_placeholder));
+
+        ImageButton playButton = listItemView.findViewById(R.id.timer_play_image_button);
+        playButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
 
         return listItemView;
     }
