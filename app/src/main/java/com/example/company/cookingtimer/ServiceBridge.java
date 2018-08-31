@@ -40,7 +40,7 @@ public class ServiceBridge {
     /**
      * This updates the UI for TimerService1
      */
-    public static class BridgeToService1 extends TimerFragment{
+    public static class BridgeToService1 {
 
         DonutProgress progress1;
         TextView timeTextView1;
@@ -75,7 +75,7 @@ public class ServiceBridge {
     /**
      * This updates the UI for TimerService2
      */
-    public static class BridgeToService2 extends TimerFragment{
+    public static class BridgeToService2 {
 
         DonutProgress progress1;
         TextView timeTextView1;
