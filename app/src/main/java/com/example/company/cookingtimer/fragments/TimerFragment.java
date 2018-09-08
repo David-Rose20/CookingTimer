@@ -33,6 +33,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.NumberPicker;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.company.cookingtimer.ServiceBridge;
 import com.example.company.cookingtimer.interfaces.TimerClickInterface;
 import com.example.company.cookingtimer.adapters.TimerRecyclerAdapter;
@@ -263,6 +265,10 @@ public class TimerFragment extends Fragment {
 
             if (requestCode == GALLERY_CODE && resultCode == Activity.RESULT_OK) {
                 Uri imageUri = data.getData();
+                Glide.with(getContext())
+                        .load(imageUri)
+                        .apply(new RequestOptions().override(150))
+                        .into(addPictureImageView);
                 addPictureImageView.setImageURI(imageUri);
                 mUriPath = imageUri.toString();
             }
