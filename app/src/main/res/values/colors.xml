@@ -9,4 +9,6 @@
     <color name="colorGreen">#4CAF50</color>
     <color name="transparentGrey">#30424242</color>
     <color name="primaryTransparent">#203F51B5</color>
+    <color name="cyanColor">#009688</color>
+    <color name="blueGreyColor">#455A64</color>
 </resources>

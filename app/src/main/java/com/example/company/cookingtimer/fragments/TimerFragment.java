@@ -1,11 +1,18 @@
 package com.example.company.cookingtimer.fragments;
 
 
+import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 
 import android.arch.persistence.room.Room;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -27,31 +34,36 @@ import android.widget.ImageView;
 import android.widget.NumberPicker;
 
 import com.example.company.cookingtimer.ServiceBridge;
-import com.example.company.cookingtimer.TimerClickInterface;
+import com.example.company.cookingtimer.interfaces.TimerClickInterface;
 import com.example.company.cookingtimer.adapters.TimerRecyclerAdapter;
-import com.example.company.cookingtimer.services.ServiceManager;
 import com.example.company.cookingtimer.utils.TimerUtils;
 import com.example.company.cookingtimer.room.AppDatabase;
 import com.example.company.cookingtimer.ApplicationTimer;
 import com.example.company.cookingtimer.R;
 import com.example.company.cookingtimer.models.Timer;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class TimerFragment extends Fragment {
 
-    View emptyView;
-    static CustomDialogFragment dialogFragment;
+    private static final int GALLERY_CODE = 20;
+    private static final int CAMERA_CODE = 200;
 
-    TimerRecyclerAdapter recyclerAdapter;
-    TimerUtils timerUtils;
+    private View emptyView;
+    private TimerRecyclerAdapter recyclerAdapter;
+    private TimerUtils timerUtils;
 
-    RecyclerView recyclerView;
-    ServiceBridge serviceBridge;
-    List<Timer> dbTimerList;
+    private RecyclerView recyclerView;
+    private ServiceBridge serviceBridge;
+    private List<Timer> dbTimerList;
 
     private static final String TAG = "TimerFragment";
 
@@ -87,7 +99,7 @@ public class TimerFragment extends Fragment {
         serviceBridge = ServiceBridge.getInstance();
     }
 
-    private void initializeDataBase(){
+    private void initializeDataBase() {
         final AppDatabase database = Room.databaseBuilder(getContext(), AppDatabase.class, "db-timers")
                 .allowMainThreadQueries()
                 .build();
@@ -105,21 +117,19 @@ public class TimerFragment extends Fragment {
         });
     }
 
-    private void createRecyclerAdapter(){
+    private void createRecyclerAdapter() {
         recyclerAdapter = new TimerRecyclerAdapter(getContext(), dbTimerList, new TimerClickInterface() {
             @Override
             public void onItemClicked(View view, int position) {
-                if (ServiceManager.isServiceAvailable()) {
-                    Timer currentTimer = dbTimerList.get(position);
+                Timer currentTimer = dbTimerList.get(position);
 
-                    ApplicationTimer applicationTimer = new ApplicationTimer(getContext());
-                    applicationTimer.startTimer(view, currentTimer);
-                }
+                ApplicationTimer applicationTimer = new ApplicationTimer(getContext());
+                applicationTimer.startTimer(view, currentTimer);
             }
         });
     }
 
-    private void setupRecyclerView(){
+    private void setupRecyclerView() {
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(layoutManager);
@@ -141,6 +151,10 @@ public class TimerFragment extends Fragment {
 
 
     public static class CustomDialogFragment extends DialogFragment {
+
+        private String mUriPath;
+        ImageView addPictureImageView;
+
         public CustomDialogFragment() {
             //Empty
         }
@@ -202,9 +216,75 @@ public class TimerFragment extends Fragment {
                 @Override
                 public void onClick(View view) {
                     saveToDatabase(timerName, wheelPickerSec, wheelPickerMin, wheelPickerHour);
-                    dialogFragment.dismissAllowingStateLoss();
+                    dismissAllowingStateLoss();
                 }
             });
+            addPictureImageView = view.findViewById(R.id.add_picture_icon);
+            addPictureImageView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                    openImageDialog();
+                }
+            });
+        }
+
+        private void openImageDialog(){
+            AlertDialog.Builder alertBuilder = new AlertDialog.Builder(getContext());
+            alertBuilder.setTitle(R.string.choose_option);
+            alertBuilder.setMessage(R.string.retrieve_image);
+            alertBuilder.setNeutralButton(R.string.gallery, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    galleryIntent();
+                }
+            });
+            alertBuilder.setPositiveButton(R.string.camera, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    cameraIntent();
+                }
+            }).show();
+        }
+
+        private void galleryIntent() {
+            Intent getPicIntent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+            getPicIntent.setType("image/jpeg");
+            startActivityForResult(getPicIntent, GALLERY_CODE);
+        }
+
+        private void cameraIntent() {
+            Intent getThumbnailIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            startActivityForResult(getThumbnailIntent, 200);
+        }
+
+        @Override
+        public void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+            if (requestCode == GALLERY_CODE && resultCode == Activity.RESULT_OK) {
+                Uri imageUri = data.getData();
+                addPictureImageView.setImageURI(imageUri);
+                mUriPath = imageUri.toString();
+            }
+            if (requestCode == CAMERA_CODE && resultCode == Activity.RESULT_OK) {
+                Bitmap thumbnail = (Bitmap) data.getExtras().get("data");
+                addPictureImageView.setImageBitmap(thumbnail);
+
+                String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss",
+                        Locale.getDefault()).format(new Date());
+
+                String fileName = timeStamp;
+
+                File imageFile = new File(getContext().getFilesDir(), fileName);
+
+                try {
+                    FileOutputStream outputStream = new FileOutputStream(imageFile);
+                    thumbnail.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+                    mUriPath = imageFile.getAbsolutePath();
+                } catch (Exception e) {
+                    Log.e(TAG, "onActivityResult: ", e);
+                }
+            }
         }
 
         @Nullable
@@ -232,19 +312,17 @@ public class TimerFragment extends Fragment {
         }
 
         private void saveToDatabase(EditText timerName, NumberPicker wheelPickerSec,
-                                    NumberPicker wheelPickerMin, NumberPicker wheelPickerHour){
-            int seconds = wheelPickerSec.getValue();
+                                    NumberPicker wheelPickerMin, NumberPicker wheelPickerHour) {
+            int seconds = wheelPickerSec.getValue() * 5 * 1000;
             int minutes = wheelPickerMin.getValue() * 1000 * 60;
             int hours = wheelPickerHour.getValue() * 1000 * 60 * 60;
-            if (seconds != 0){
-                seconds += 1000 * 5;
-            }
             int timeInMillis = seconds + minutes + hours;
             String name = timerName.getText().toString();
             Timer timer = new Timer();
+
             timer.setTimerName(name);
             timer.setTimeInMillis(timeInMillis);
-
+            timer.setTimerImageUriString(mUriPath);
             AppDatabase database = Room.databaseBuilder(getContext(), AppDatabase.class, "db-timers")
                     .allowMainThreadQueries()
                     .build();
@@ -255,8 +333,8 @@ public class TimerFragment extends Fragment {
     }
 
     private void showAddTimerDialog() {
+        CustomDialogFragment dialogFragment = new CustomDialogFragment();
         FragmentManager fragmentManager = getActivity().getSupportFragmentManager();
-        dialogFragment = new CustomDialogFragment();
 
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);

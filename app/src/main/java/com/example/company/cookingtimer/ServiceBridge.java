@@ -5,135 +5,142 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.support.v4.content.LocalBroadcastManager;
-import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 
-import com.example.company.cookingtimer.fragments.TimerFragment;
+import com.example.company.cookingtimer.adapters.TimerRecyclerAdapter;
+import com.example.company.cookingtimer.models.Timer;
+import com.example.company.cookingtimer.services.TimerService;
 import com.example.company.cookingtimer.utils.TimerUtils;
 import com.github.lzyzsd.circleprogress.DonutProgress;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- *
  * This class acts as a bridge to the Service(s) & TimerFragment's UI.
- *
  */
 
 public class ServiceBridge {
 
     private static ServiceBridge serviceBridgeInstance;
+    private static List<ViewClass> viewClassList;
 
     TimerUtils timerUtils;
+    static IntentFilter intentFilter;
 
     private BroadcastReceiver broadcastReceiver;
     public BridgeToService1 bridgeToService1;
-    public BridgeToService2 bridgeToService2;
-
 
 
     public static ServiceBridge getInstance(){
         if (serviceBridgeInstance == null){
             serviceBridgeInstance = new ServiceBridge();
+            intentFilter = new IntentFilter();
+            viewClassList = new ArrayList<>();
+
         }
         return serviceBridgeInstance;
     }
 
     /**
-     * This updates the UI for TimerService1
+     *This model acts as a View container.
+     * This is needed to keep track of the UI and
+     * assign views on orientation changes, re-opening, etc.
      */
-    public static class BridgeToService1 {
+    public class ViewClass {
 
-        DonutProgress progress1;
-        TextView timeTextView1;
-        long timerLengthInMilliSeconds1;
+        DonutProgress progress;
+        TextView timeTextView;
+        int timerLength;
+        String action;
 
-        public void BridgeToService1(Context context, DonutProgress progress, TextView timeTextView,
-                                     long timerLengthInMilliSeconds){
-            progress1 = progress;
-            timeTextView1 = timeTextView;
-            timerLengthInMilliSeconds1 = timerLengthInMilliSeconds;
-            progress.setMax((int)timerLengthInMilliSeconds);
-
+        public ViewClass(DonutProgress progress, TextView timeTextView, int timerLength, String action){
+            this.progress = progress;
+            this.timeTextView = timeTextView;
+            this.timerLength = timerLength;
+            this.action = action;
         }
 
-        /**
-         * updateViews is called from the localBroadcastReceiver() to
-         * update the views
-         * @param timeLeftInMillis
-         */
-        private void updateViews(long timeLeftInMillis) {
-            if (progress1 != null && timeTextView1 != null){
-                progress1.setProgress(timeLeftInMillis);
-                timeTextView1.setText(formatTime((int)timeLeftInMillis));
+        public void setProgress(DonutProgress progress){
+            this.progress = progress;
+        }
+
+        public void setMaxProgressValue(int maxProgressValue){
+            this.progress.setMax(maxProgressValue);
+        }
+
+        public void setTimeTextView(TextView timeTextView){
+            this.timeTextView = timeTextView;
+        }
+
+        public void setTimerLength(int timerLength){
+            this.timerLength = timerLength;
+        }
+
+        public void setAction(String action){
+            this.action = action;
+        }
+
+        public DonutProgress getProgress() {
+            return progress;
+        }
+
+        public TextView getTimeTextView() {
+            return timeTextView;
+        }
+
+        public String getAction(){
+            return action;
+        }
+    }
+
+    /**
+     * This updates the UI for all timers
+     */
+    public class BridgeToService1 {
+
+
+        public void bridge(final DonutProgress progress, TextView timeTextView,
+                           long timerLengthInMilliSeconds, String intentFilter) {
+
+            progress.setMax((int) timerLengthInMilliSeconds);
+            viewClassList.add(new ViewClass(progress, timeTextView, (int) timerLengthInMilliSeconds, intentFilter));
+        }
+
+        private void applyValuesToViews(String action, int timeLeftInMillis) {
+            for (int i = 0; i < viewClassList.size(); i++) {
+                String listAction = viewClassList.get(i).getAction();
+                if (listAction.equals(action)) {
+                    DonutProgress donutProgress = viewClassList.get(i).getProgress();
+                    TextView textView = viewClassList.get(i).getTimeTextView();
+                    updateViewWithHandler(donutProgress, textView, timeLeftInMillis);
+                }
             }
+        }
+        }
+
+        private void updateViewWithHandler(DonutProgress progress, TextView timeTextView, int timeRemaining) {
+            progress.setProgress(timeRemaining);
+            timeTextView.setText(formatTime(timeRemaining));
         }
 
         private String formatTime(int durationInMillis) {
             return TimerUtils.getFormattedTime(durationInMillis);
         }
-    }
 
-    /**
-     * This updates the UI for TimerService2
-     */
-    public static class BridgeToService2 {
 
-        DonutProgress progress1;
-        TextView timeTextView1;
-        long timerLengthInMilliSeconds1;
-
-        public void BridgeToService2(Context context, DonutProgress progress, TextView timeTextView,
-                                     long timerLengthInMilliSeconds){
-            progress1 = progress;
-            timeTextView1 = timeTextView;
-            timerLengthInMilliSeconds1 = timerLengthInMilliSeconds;
-            progress.setMax((int)timerLengthInMilliSeconds);
-
-        }
-
-        /**
-         * updateViews is called from the localBroadcastReceiver() to
-         * update the views
-         * @param timeLeftInMillis
-         */
-        private void updateViews(long timeLeftInMillis) {
-            if (progress1 != null && timeTextView1 != null){
-                progress1.setProgress(timeLeftInMillis);
-                timeTextView1.setText(formatTime((int)timeLeftInMillis));
-            }
-        }
-
-        private String formatTime(int durationInMillis) {
-            return TimerUtils.getFormattedTime(durationInMillis);
-        }
-    }
-
-    /**
-     *
-     * @param context
-     * @param progress
-     * @param timeTextView
-     * @param timerLengthInMilliSeconds
-     * @param stringIntentFilter
-     */
     public void bindServiceAndUI(Context context, DonutProgress progress,
-                               TextView timeTextView, long timerLengthInMilliSeconds, String stringIntentFilter) {
-        if (stringIntentFilter.equals("service-1")){
+                               TextView timeTextView, long timerLengthInMilliSeconds, String newIntentFilter) {
+        intentFilter.addAction(newIntentFilter);
+
             bridgeToService1 = new BridgeToService1();
-            bridgeToService1.BridgeToService1(context, progress, timeTextView,
-                    timerLengthInMilliSeconds);
-        } else {
-            bridgeToService2 = new BridgeToService2();
-            bridgeToService2.BridgeToService2(context, progress, timeTextView,
-                    timerLengthInMilliSeconds);
-        }
+            bridgeToService1.bridge(progress, timeTextView,
+                    timerLengthInMilliSeconds, newIntentFilter);
 
         timerUtils = TimerUtils.getInstance();
 
-
         localBroadcastReceiver();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("service-1");
-        intentFilter.addAction("service-2");
         LocalBroadcastManager.getInstance(context).registerReceiver(broadcastReceiver, intentFilter);
     }
 
@@ -144,22 +151,48 @@ public class ServiceBridge {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = "";
-                if (intent.getAction() != null){
+                if (intent.getAction() != null) {
                     action = intent.getAction();
                 }
-                long timeLeftInMillis;
-                switch (action){
-                    case "service-1":
-                        timeLeftInMillis = intent.getLongExtra("id", 0);
-                        bridgeToService1.updateViews(timeLeftInMillis);
-                        break;
-                    case "service-2":
-                        timeLeftInMillis = intent.getLongExtra("id", 0);
-                        bridgeToService2.updateViews(timeLeftInMillis);
-                        break;
-                }
+                long timeLeftInMillis = intent.getLongExtra(TimerService.TIME_REMAINING_KEY, 0);
+                bridgeToService1.applyValuesToViews(action, (int)timeLeftInMillis);
             }
         };
+    }
+
+    /**
+     * This is called from the Recycler Adapter.
+     * When scrolling views are recycled so by using the holder we can get the
+     * list_item view and  the timer is also needed.
+     * @param holder
+     * @param timer
+     */
+    public void viewHolder(TimerRecyclerAdapter.ViewHolder holder, Timer timer){
+
+        View itemView = holder.itemView;
+        //
+        String title = timer.getTimerName();
+        for (int i = 0; i < viewClassList.size(); i++) {
+            ViewClass currentViewItem = viewClassList.get(i);
+            // getAction is the title of the timer
+            String viewClassAction = currentViewItem.getAction();
+            // if the current actions equals the itemView's title it's a match
+            if (viewClassAction.equals(title)){
+                // Since the views are destroyed after being recycled
+                // we have to set new views to the currentViewItem from the itemView.
+                DonutProgress newProgress = itemView.findViewById(R.id.timer_donut_progress);
+                currentViewItem.setProgress(newProgress);
+
+                TextView newTimeText = itemView.findViewById(R.id.timer_time_left_text);
+                currentViewItem.setTimeTextView(newTimeText);
+
+                currentViewItem.setTimerLength(timer.getTimeInMillis());
+
+                currentViewItem.setMaxProgressValue(timer.getTimeInMillis());
+
+                currentViewItem.setAction(timer.getTimerName());
+            }
+        }
     }
 }
 

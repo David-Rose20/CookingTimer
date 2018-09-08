@@ -1,4 +1,4 @@
-package com.example.company.cookingtimer;
+package com.example.company.cookingtimer.interfaces;
 
 import android.view.View;
 

@@ -11,4 +11,10 @@
     <string name="wheel_picker_text_minute">Minute</string>
     <string name="wheel_picker_text_second">Second</string>
     <string name="title_set_your_timer">Set your timer</string>
+    <string name="left">left</string>
+    <string name="more">more)</string>
+    <string name="choose_option">Choose option</string>
+    <string name="retrieve_image">How would you like to retrieve an image?</string>
+    <string name="gallery">Gallery</string>
+    <string name="camera">Camera</string>
 </resources>

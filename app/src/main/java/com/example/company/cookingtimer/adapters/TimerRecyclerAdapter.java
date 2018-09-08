@@ -11,9 +11,11 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 
-import com.example.company.cookingtimer.ApplicationTimer;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.company.cookingtimer.R;
-import com.example.company.cookingtimer.TimerClickInterface;
+import com.example.company.cookingtimer.ServiceBridge;
+import com.example.company.cookingtimer.interfaces.TimerClickInterface;
 import com.example.company.cookingtimer.models.Timer;
 import com.example.company.cookingtimer.utils.TimerUtils;
 
@@ -27,14 +29,14 @@ public class TimerRecyclerAdapter extends RecyclerView.Adapter<TimerRecyclerAdap
     List<Timer> mTimerList;
     TimerUtils timerUtils;
     TimerClickInterface mClickInterface;
-    ApplicationTimer applicationTimer;
+    ServiceBridge serviceBridge;
 
     public TimerRecyclerAdapter(Context context, List<Timer> timerList, TimerClickInterface timerClickInterface){
         mTimerList = timerList;
         mContext = context;
         timerUtils = TimerUtils.getInstance();
         mClickInterface = timerClickInterface;
-        applicationTimer = new ApplicationTimer(context);
+        serviceBridge = new ServiceBridge();
     }
 
 
@@ -78,10 +80,14 @@ public class TimerRecyclerAdapter extends RecyclerView.Adapter<TimerRecyclerAdap
         String formattedTime = formatTime(currentTimer.getTimeInMillis());
         holder.timeLeft.setText(formattedTime);
 
-        holder.imageIcon.setImageDrawable(mContext.getDrawable(R.drawable.pasta_placeholder));
+        Glide.with(mContext)
+                .load(currentTimer.getTimerImageUriString())
+                .apply(new RequestOptions().override(120))
+                .into(holder.imageIcon);
 
-        applicationTimer.testingHolder(holder);
+        Log.d("adapter", "onBindViewHolder: URI = " + currentTimer.getTimerImageUriString());
 
+        serviceBridge.viewHolder(holder, currentTimer);
     }
 
     @Override
