@@ -2,7 +2,10 @@ package com.example.company.cookingtimer.models;
 
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.PrimaryKey;
+import android.net.Uri;
 import android.support.annotation.NonNull;
+
+import java.util.List;
 
 @Entity(tableName = "timer")
 public class Timer {
@@ -13,16 +16,7 @@ public class Timer {
 
     private int mTimeInMillis;
 
-//    private int mTimerId;
-//    private int mImageResourceId;
-
-
-//    public Timer(String timerName, int timeInMillis, int imageResourceId, int timerId){
-//        mTimerName = timerName;
-//        mTimeInMillis = timeInMillis;
-//        mImageResourceId = imageResourceId;
-//        mTimerId = timerId;
-//    }
+    private String mTimerImageUriString;
 
     public void setTimerName(String timerName){
         mTimerName = timerName;
@@ -30,6 +24,10 @@ public class Timer {
 
     public void setTimeInMillis(int timeInMillis){
         mTimeInMillis = timeInMillis;
+    }
+
+    public void setTimerImageUriString(String timerImageUri){
+        mTimerImageUriString = timerImageUri;
     }
 
     @NonNull
@@ -41,11 +39,7 @@ public class Timer {
         return mTimeInMillis;
     }
 
-//    public int getTimerId() {
-//        return mTimerId;
-//    }
-
-//    public int getImageResourceId(){
-//        return mImageResourceId;
-//    }
+    public String getTimerImageUriString(){
+        return mTimerImageUriString;
+    }
 }
