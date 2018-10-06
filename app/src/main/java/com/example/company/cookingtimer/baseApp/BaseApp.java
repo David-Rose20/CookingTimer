@@ -9,6 +9,7 @@ public class BaseApp extends Application {
 
     /**
      * This is for creating required Notification Channels for API 26 or greater.
+     * I'm not sure if extending the Application is necessary/or the right approach.
      */
 
     public static final String CHANNEL_ID = "channel-id";

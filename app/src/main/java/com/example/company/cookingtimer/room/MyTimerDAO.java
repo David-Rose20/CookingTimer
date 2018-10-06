@@ -28,8 +28,4 @@ public interface MyTimerDAO {
     @Query("SELECT * FROM timer WHERE mTimerName =:name")
     Timer getTimerName(String name);
 
-//    @Query("SELECT * FROM timer WHERE timerName = :number")
-//    MyTimer getTimerWithId(name);
-
-
 }
