@@ -36,7 +36,7 @@ public class TimerRecyclerAdapter extends RecyclerView.Adapter<TimerRecyclerAdap
         mContext = context;
         timerUtils = TimerUtils.getInstance();
         mClickInterface = timerClickInterface;
-        serviceBridge = new ServiceBridge();
+        serviceBridge = ServiceBridge.getInstance();
     }
 
 

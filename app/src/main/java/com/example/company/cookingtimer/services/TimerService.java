@@ -72,7 +72,7 @@ public class TimerService extends Service {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         // If this is the first timer it will create the foreground service.
-        if (numberOfTimers <= 1) {
+        if (numberOfTimers == 2) {
 
             NotificationCompat.Builder builder1 = new NotificationCompat.Builder(this, CHANNEL_ID);
 
@@ -143,7 +143,7 @@ public class TimerService extends Service {
             @Override
             public void onFinish() {
                 numberOfTimers--;
-                finish(timerName, startId);
+                finish(timerName, timerImageUri, startId);
                 if (numberOfTimers <= 0) {
                     stopForeground(true);
                     stopSelf();
@@ -153,19 +153,27 @@ public class TimerService extends Service {
     }
 
 
-    private void finish(String timerName, int startId) {
+    private void finish(String timerName, String timerImageUri, int startId) {
 
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.pasta_placeholder);
+        Glide.with(this)
+                .asBitmap()
+                .load(timerImageUri)
+                .apply(new RequestOptions().override(120))
+                .into(new SimpleTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        builder.setLargeIcon(resource);
+                    }
+                });
         Notification notification1 = builder
                 .setColor(getResources().getColor(R.color.blueGreyColor))
                 .setSmallIcon(R.drawable.ic_action_clock)
                 .setContentTitle(timerName)
                 .setContentText("Timer finished!")
                 .setGroup("timer_group")
-                .setLargeIcon(bitmap)
                 .setContentIntent(pendingIntent)
                 .build();
 
@@ -217,5 +225,4 @@ public class TimerService extends Service {
 
         notificationManager.notify(startId, builder.build());
     }
-
 }

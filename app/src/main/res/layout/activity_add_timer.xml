@@ -113,7 +113,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="-10dp"
-                android:text="Add a picture"/>
+                android:text="@string/add_a_picture"/>
 
             <ImageView
                 android:id="@+id/button_add_timer"
@@ -125,8 +125,6 @@
                 android:scaleY="1.5"
                 android:padding="8dp"
                 android:tint="@color/colorAccent" />
-
-
 
         </LinearLayout>
 
